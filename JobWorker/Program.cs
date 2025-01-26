@@ -41,7 +41,7 @@ await foreach (var msg in consumer.ConsumeAsync<Job>())
     Console.WriteLine($"Processing job {job.Id}: {job.Description}...");
 
     // Simulate job execution
-    await Task.Delay(3000); // Simulating job execution time
+    await Task.Delay(2000); // Simulating job execution time
 
     // Send job result back to JobManager
     await nc.PublishAsync(subject: resultSubject, data: new JobResult

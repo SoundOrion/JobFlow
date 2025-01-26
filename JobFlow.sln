@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobManager", "JobManager\JobManager.csproj", "{9F612EC7-B986-40ED-88AA-0BD9E90976A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobWorker", "JobWorker\JobWorker.csproj", "{EA2A4422-7328-4B57-AC33-EE6F0936D525}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorAppJobManager", "BlazorAppJobManager\BlazorAppJobManager.csproj", "{68EAF8B4-5AAF-4C07-AAF2-4F617B215B8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{EA2A4422-7328-4B57-AC33-EE6F0936D525}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA2A4422-7328-4B57-AC33-EE6F0936D525}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA2A4422-7328-4B57-AC33-EE6F0936D525}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68EAF8B4-5AAF-4C07-AAF2-4F617B215B8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68EAF8B4-5AAF-4C07-AAF2-4F617B215B8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68EAF8B4-5AAF-4C07-AAF2-4F617B215B8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68EAF8B4-5AAF-4C07-AAF2-4F617B215B8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

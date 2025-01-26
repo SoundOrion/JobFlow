@@ -1,0 +1,61 @@
+﻿@page "/jobmanager"
+@using BlazorAppJobManager.Services
+@inject JobService JobService
+
+<PageTitle>Job Manager</PageTitle>
+<h3>Job Manager</h3>
+
+<div>
+    <h4>Register Job</h4>
+    <input @bind="jobDescription" placeholder="Job description" />
+    <button @onclick="RegisterJob">Register</button>
+</div>
+
+<div>
+    <h4>Jobs in Queue</h4>
+    <ul>
+        @foreach (var job in JobService.JobQueue)
+        {
+            <li>@job.Description</li>
+        }
+    </ul>
+</div>
+
+<div>
+    <h4>Job Results</h4>
+    <ul>
+        @foreach (var result in JobService.JobResults)
+        {
+            <li>Job @result.Key: @result.Value</li>
+        }
+    </ul>
+</div>
+
+@code {
+    private string jobDescription;
+
+    protected override void OnInitialized()
+    {
+        // イベントを購読
+        JobService.JobResultsUpdated += UpdateUI;
+    }
+
+    private void UpdateUI()
+    {
+        InvokeAsync(StateHasChanged); // UI を更新
+    }
+
+    public void Dispose()
+    {
+        // イベントを解除
+        JobService.JobResultsUpdated -= UpdateUI;
+    }
+
+    private async Task RegisterJob()
+    {
+        var jobId = JobService.JobQueue.Count + 1;
+        var job = new Job { Id = jobId, Description = jobDescription };
+        await JobService.PublishJobAsync(job);
+        jobDescription = string.Empty;
+    }
+}
