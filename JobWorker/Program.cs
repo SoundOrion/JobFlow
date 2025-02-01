@@ -1,71 +1,34 @@
-﻿// JobWorker.csproj
-// Install NuGet packages: NATS.Net
-using System.Text.Json.Serialization;
-using System.Threading;
-using NATS.Client.Core;
-using NATS.Client.JetStream;
-using NATS.Client.JetStream.Models;
+﻿// **プログラムのエントリーポイント**
 using NATS.Net;
 
-var url = Environment.GetEnvironmentVariable("NATS_URL") ?? "nats://127.0.0.1:4222";
-
-await using var nc = new NatsClient(url);
-await nc.ConnectAsync();
-
-var js = nc.CreateJetStreamContext();
-
-// Stream and subject configuration
-var streamName = "JOB_STREAM";
-var jobSubject = "jobs.pending";
-var resultSubject = "jobs.result";
-var durableConsumerName = "worker";
-//var durableConsumerName = $"worker-{Guid.NewGuid()}";
-
-// Step 1: Create a durable consumer to receive jobs
-var consumerConfig = new ConsumerConfig
+class Program
 {
-    Name = durableConsumerName,
-    DurableName = durableConsumerName,
-    AckPolicy = ConsumerConfigAckPolicy.Explicit, // Ensure jobs are acknowledged
-    FilterSubject = jobSubject // サブジェクトを明示
-};
-
-var consumer = await js.CreateOrUpdateConsumerAsync(streamName, consumerConfig);
-Console.WriteLine($"Created new consumer: {consumer.Info.Name}");
-Console.WriteLine($"Worker '{durableConsumerName}' ready to process jobs.");
-
-// Step 2: Fetch and process jobs
-await foreach (var msg in consumer.ConsumeAsync<Job>())
-{
-    var job = msg.Data;
-    Console.WriteLine($"Processing job {job.Id}: {job.Description}...");
-
-    // Simulate job execution
-    await Task.Delay(2000); // Simulating job execution time
-
-    // Send job result back to JobManager
-    await nc.PublishAsync(subject: resultSubject, data: new JobResult
+    static async Task Main()
     {
-        JobId = job.Id,
-        Status = "Completed"
-    });
+        string url = Environment.GetEnvironmentVariable("NATS_URL") ?? "nats://127.0.0.1:4222";
+        var jobWorker = new JobWorker(url);
 
-    Console.WriteLine($"Job {job.Id} completed. Sending result to JobManager.");
+        // **✅ `JobCompleted` に処理を登録**
+        jobWorker.JobCompleted += SendJobResultToManager;
+        jobWorker.JobCompleted += LogJobCompletion;
 
-    // Acknowledge the job to remove it from the queue
-    await msg.AckAsync();
-}
+        await jobWorker.StartAsync();
+    }
 
-// Job model
-public record Job
-{
-    [JsonPropertyName("id")] public int Id { get; init; }
-    [JsonPropertyName("description")] public string Description { get; init; }
-}
+    // **JobManager にジョブ結果を送信**
+    static async void SendJobResultToManager(JobResult result)
+    {
+        string url = Environment.GetEnvironmentVariable("NATS_URL") ?? "nats://127.0.0.1:4222";
+        await using var nc = new NatsClient(url);
+        await nc.ConnectAsync();
 
-// JobResult model
-public record JobResult
-{
-    [JsonPropertyName("job_id")] public int JobId { get; init; }
-    [JsonPropertyName("status")] public string Status { get; init; }
+        await nc.PublishAsync(subject: "jobs.result", data: result);
+        Console.WriteLine($"✅ Job {result.JobId} completed. Sent result to JobManager.");
+    }
+
+    // **ジョブ完了ログを記録**
+    static void LogJobCompletion(JobResult result)
+    {
+        Console.WriteLine($"📁 Job {result.JobId} finished with status: {result.Status} (Logged)");
+    }
 }
